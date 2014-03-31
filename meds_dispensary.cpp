@@ -1,5 +1,7 @@
 #include "meds_dispensary.h"
 #include "ui_meds_dispensary.h"
+#include <QFontDatabase>
+#include <QtCore/qdebug.h>
 
 Meds_dispensary::Meds_dispensary(QWidget *parent) :
     QWidget(parent),
@@ -10,6 +12,10 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
     m_dcb = new motor(e_motor_id::e_motor_b);
     sr1 = new gpio_sensor("P9_25", "P9_39");
     sr2 = new gpio_sensor("P9_27", "P9_40");
+
+//    QFontDatabase fonts;
+//    qDebug() << "fonts" << fonts.families();
+
 }
 
 Meds_dispensary::~Meds_dispensary()
