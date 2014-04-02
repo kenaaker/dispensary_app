@@ -18,6 +18,17 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
 
 }
 
+void Meds_dispensary::quiesce() {
+    ;
+};
+
+void Meds_dispensary::start_working() {
+//    arena_setup();
+//    sweeps_setup();
+//    arena_center();
+//    sweeps_leveling();
+};
+
 Meds_dispensary::~Meds_dispensary()
 {
     delete sr1;
