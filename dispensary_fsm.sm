@@ -1,0 +1,74 @@
+%{
+//
+// Copyright (c) 2014 Ken Aaker
+// All rights reserved.
+//
+//
+// Author: Kenneth D. Aaker
+//
+%}
+// This FSM works for the Meds_dispensary class only and only the
+// Meds_dispensary class may instantiate it.
+%class Meds_dispensary
+%header meds_dispensary.h
+%start dispens::setting_up
+
+%map dispens
+%%
+// State            Transition		End State		Action(s)
+setting_up
+{
+                    init_dispense       safe_state              {}
+                    shutdown            off                     {}
+                    Unknown             error                   {}
+} // setting_up
+
+safe_state
+{
+                    start_working       waiting_for_pills       {}
+                    shutdown            off                     {}
+                    Unknown             error                   {}
+} // safe_state
+
+waiting_for_pills
+{
+                    pills_loaded        leveling                {}
+                    halt_operation      unloading               {}
+                    Unknown             error                   {}
+} // waiting for pills
+
+leveling
+{
+                    leveling_done       dispensing              {}
+                    halt_operation      unloading               {}
+                    Unknown             error                   {}
+} // leveling
+
+dispensing
+{
+                    pill_seen           safe_state              {}
+                    halt_operation      unloading               {}
+                    Unknown             error                   {}
+} // dispensing
+
+unloading
+{
+                    done_unloading      safe_state              {}
+                    halt_operation      safe_state              {}
+                    Unknown             error                   {}
+} // unloading
+
+shutdown
+{
+                    shutdown_done       off                     {}
+                    Unknown             error                   {}
+} // shutdown
+off
+{
+
+}
+error
+{
+                    Unknown             nil                     {}
+}
+%%  

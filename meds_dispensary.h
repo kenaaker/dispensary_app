@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include "motor.h"
 #include "gpio_sensor.h"
+#include <dispensary_fsm_sm.h>
 
 namespace Ui {
 class Meds_dispensary;
@@ -16,10 +17,7 @@ class Meds_dispensary : public QWidget
 public:
     explicit Meds_dispensary(QWidget *parent = 0);
     ~Meds_dispensary();
-
-public slots:
-    void go_idle() { quiesce(); };
-    void dispense() { start_working(); };
+    dispensary_fsmContext dispense_fsm;
 
 private:
     Ui::Meds_dispensary *ui;

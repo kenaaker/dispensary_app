@@ -5,8 +5,10 @@
 
 Meds_dispensary::Meds_dispensary(QWidget *parent) :
     QWidget(parent),
+    dispense_fsm(*this),
     ui(new Ui::Meds_dispensary)
 {
+    dispense_fsm.enterStartState();
     ui->setupUi(this);
     m_dca = new motor(e_motor_id::e_motor_a);
     m_dcb = new motor(e_motor_id::e_motor_b);
