@@ -11,12 +11,19 @@
 // Meds_dispensary class may instantiate it.
 %class Meds_dispensary
 %header meds_dispensary.h
-%start dispens::setting_up
+%start dispensary_fsm::setting_up
+%include <QtWidgets>
+%include <QString>
 
-%map dispens
+%map dispensary_fsm
 %%
 // State            Transition		End State		Action(s)
 setting_up
+    Entry {
+        set_motor_a_speed(0);
+        set_motor_b_speed(0);
+        set_status_label(QString("Setting Up"));
+    } /* setting_up entry */
 {
                     init_dispense       safe_state              {}
                     shutdown            off                     {}
@@ -59,6 +66,10 @@ unloading
 } // unloading
 
 shutdown
+Entry {
+//    m_dca->motor_run(0);
+//    m_dcb->motor_run(0);
+} /* shutdown entry */
 {
                     shutdown_done       off                     {}
                     Unknown             error                   {}

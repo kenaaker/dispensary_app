@@ -40,9 +40,9 @@
   <widget class="QLabel" name="header">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>30</x>
      <y>0</y>
-     <width>80</width>
+     <width>63</width>
      <height>16</height>
     </rect>
    </property>
@@ -70,10 +70,10 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>2</x>
-     <y>13</y>
+     <x>3</x>
+     <y>28</y>
      <width>124</width>
-     <height>50</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -101,6 +101,33 @@
    </property>
    <property name="lineWidth">
     <number>1</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="status_label">
+   <property name="geometry">
+    <rect>
+     <x>4</x>
+     <y>12</y>
+     <width>120</width>
+     <height>12</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777209</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Status</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>
