@@ -20,6 +20,8 @@ public:
     void set_motor_a_speed(int);
     void set_motor_b_speed(int);
     void set_status_label(QString);
+    void set_arena_to_safe_pos();
+    void sweep_limbs(int rotate_degrees);
 
 private:
     Ui::Meds_dispensary *ui;

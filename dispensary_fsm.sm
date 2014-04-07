@@ -23,6 +23,8 @@ setting_up
         set_motor_a_speed(0);
         set_motor_b_speed(0);
         set_status_label(QString("Setting Up"));
+        set_arena_to_safe_pos();
+        sweep_limbs(360);
     } /* setting_up entry */
 {
                     init_dispense       safe_state              {}
