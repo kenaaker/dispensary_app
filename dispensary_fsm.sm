@@ -20,11 +20,12 @@
 // State            Transition		End State		Action(s)
 setting_up
     Entry {
+        set_status_label(QString("Setting Up"));
         set_motor_a_speed(0);
         set_motor_b_speed(0);
-        set_status_label(QString("Setting Up"));
         set_arena_to_safe_pos();
         sweep_limbs(360);
+        dispense_fsm.init_dispense();
     } /* setting_up entry */
 {
                     init_dispense       safe_state              {}
@@ -33,6 +34,9 @@ setting_up
 } // setting_up
 
 safe_state
+    Entry {
+        set_status_label(QString("Wait for Start/Stop"));
+    }
 {
                     start_working       waiting_for_pills       {}
                     shutdown            off                     {}
@@ -40,6 +44,9 @@ safe_state
 } // safe_state
 
 waiting_for_pills
+    Entry {
+        set_status_label(QString("Wait for Pills"));
+    }
 {
                     pills_loaded        leveling                {}
                     halt_operation      unloading               {}

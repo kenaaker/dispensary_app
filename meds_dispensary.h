@@ -22,6 +22,7 @@ public:
     void set_status_label(QString);
     void set_arena_to_safe_pos();
     void sweep_limbs(int rotate_degrees);
+    dispensary_fsmContext dispense_fsm;
 
 private:
     Ui::Meds_dispensary *ui;
@@ -29,7 +30,9 @@ private:
     motor *m_dcb;
     gpio_sensor *sr1;
     gpio_sensor *sr2;
-    dispensary_fsmContext dispense_fsm;
+
+private slots:
+    void dispense_start(void);
 
 };
 
