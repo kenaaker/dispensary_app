@@ -36,6 +36,7 @@ SOURCES += main.cpp\
     ../beaglebone/hw_drivers/bbb_motor_control/adafruit_bbio_adc.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/adafruit_bbio_util.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/motor.cpp \
+    ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_sensor.cpp
 
 HEADERS  += meds_dispensary.h \
@@ -47,7 +48,8 @@ HEADERS  += meds_dispensary.h \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_sensor.h \
     ../beaglebone/hw_drivers/bbb_motor_control/i2c-dev.lm-sensors.h \
     ../beaglebone/hw_drivers/bbb_motor_control/ssd1306.h \
-    ../beaglebone/hw_drivers/bbb_motor_control/motor.h
+    ../beaglebone/hw_drivers/bbb_motor_control/motor.h \
+    ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.h
 
 FORMS    += meds_dispensary.ui
 
