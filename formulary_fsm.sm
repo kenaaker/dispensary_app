@@ -1,0 +1,90 @@
+%{
+//
+// Copyright (c) 2014 Ken Aaker
+// All rights reserved.
+//
+//
+// Author: Kenneth D. Aaker
+//
+%}
+// This FSM works for the Meds_dispensary class only and only the
+// Meds_dispensary class may instantiate it.
+%class Meds_dispensary
+%header meds_dispensary.h
+%start formulary_fsm::setting_up
+%include <QtWidgets>
+%include <QString>
+
+%map formulary_fsm
+%%
+// State            Transition		End State		Action(s)
+setting_up
+    Entry {
+        set_status_label(QString("Setting Up"));
+    } /* setting_up entry */
+{
+                    init_formulary      locating_index          { set_up_formulary_motor(); }
+                    shutdown            off                     {}
+                    Unknown             error                   {}
+} // setting_up
+
+locating_index
+    Entry {
+        set_status_label(QString("Locating Index"));
+    }
+{
+                    sensor_pulse
+                        [!ctxt.stable_sensor_pulses()]
+                                        nil                     { /* Keep counting */ }
+                    sensor_pulse
+                        [ctxt.stable_sensor_pulses()]
+                                        waiting_to_arrive       {
+                                                                    disk_index_setup(); /* Finish calculating disk RPM and position */
+                                                                    move_disk(0); /* Move disk to slot 0 */
+                                                                }
+                    shutdown            off                     {}
+                    Unknown             error                   {}
+} // locating_index
+
+ready_to_move
+    Entry {
+        set_status_label(QString("Ready to Move disk"));
+    }
+{
+                    sensor_pulse
+                                        nil                     { /* Keep counting */ }
+                    move_cmd            waiting_to_arrive       {}
+                    shutdown            off                     {}
+                    Unknown             error                   {}
+} // ready_to_move
+
+waiting_to_arrive
+    Entry {
+        set_status_label(QString("Moving to slot"));
+    }
+{
+                    sensor_pulse
+                                        nil                     { /* Keep moving */}
+                    movement_done       ready_to_move           {}
+                    halt_operation      off                     {}
+                    Unknown             error                   {}
+} // waiting_to_arrive
+
+shutdown
+Entry {
+//    m_dca->motor_run(0);
+//    m_dcb->motor_run(0);
+} /* shutdown entry */
+{
+                    shutdown_done       off                     {}
+                    Unknown             error                   {}
+} // shutdown
+off
+{
+
+}
+error
+{
+                    Unknown             nil                     {}
+}
+%%  

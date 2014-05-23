@@ -1,14 +1,15 @@
 #include "meds_dispensary.h"
 #include "ui_meds_dispensary.h"
-#include "dispensary_fsm_sm.h"
+#include <formulary_fsm_sm.h>
 #include <QFontDatabase>
 #include <QProgressBar>
 #include <QtCore/qdebug.h>
 #include <QTime>
+#include <algorithm>
 
 Meds_dispensary::Meds_dispensary(QWidget *parent) :
     QWidget(parent),
-    dispense_fsm(*this),
+    formulary_fsm(*this),
     ui(new Ui::Meds_dispensary)
  {
 
@@ -33,6 +34,7 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
     highest_reading = last_disc_sensor_reading;
     formulary_rpm = 0.0;
     found_index = false;
+    first_pulse = true;
 
 //    QFontDatabase fonts;
 //    qDebug() << "fonts" << fonts.families();
@@ -50,24 +52,32 @@ Meds_dispensary::~Meds_dispensary() {
 }
 
 void Meds_dispensary::dispense_start(void) {
-    dispense_fsm.enterStartState();
+    formulary_fsm.enterStartState();
+    formulary_fsm.setDebugFlag(true);
+    formulary_fsm.init_formulary();
 }
 
 void Meds_dispensary::set_up_dispensary_motor(void) {
     m_dca->motor_run(0);
 }
 
-const static int motor_calibration_percent=50;
+const static int motor_calibration_percent=30;
 
 void Meds_dispensary::set_up_formulary_motor(void) {
 
     m_dcb->motor_run(0);
+    for (int i = 0; i<num_bottles+2; ++i) {
+        pulse_times[i] = 0;
+    }
+    pulse_count = 0;
     /* Check the hardware, first the position sensor on the formulary wheel */
-    sr2->set_read_interval(50);
+    sr2->set_read_interval(75);
     connect(sr2, SIGNAL(adc_signal(int)), this, SLOT(disc_sensor_proc(int)));
-    sr2->set_bounds(120,2000);
-    sr2->set_in_or_out(false);                      /* Send signal if out of 120->2000 bounds */
+    sr2->set_bounds(00,150);
+    sr2->set_in_or_out(false);                      /* Send signal if out of 0->100 bounds */
+    pulse_time.start();
     m_dcb->motor_run(motor_calibration_percent);    /* Start the motor running */
+    connect(m_dcb, SIGNAL(movement_done(int)), this, SLOT(movement_done_proc(int)));
     last_elapsed = 0;
     qDebug() << "Started motor speed check";
     ui->sensor_reading->setRange(0, 5);
@@ -91,35 +101,86 @@ void Meds_dispensary::sweep_limbs(int rotate_degrees) {
     m_dca->motor_stop();
 }
 
-void Meds_dispensary::disc_sensor_proc(int trigger_value) {
-    unsigned int this_reading = trigger_value;
+bool Meds_dispensary::stable_sensor_pulses() {
 
-//    qDebug() << "Current sensor reading = " << this_reading;
-    if (this_reading < (120)) {    /* sensor sees something different */
-        qDebug() << "Saw sensor_change = " << this_reading;
-        if (!found_index) {                         /* Found the index for the first time */
-            found_index = true;
-            index_time.start();
-            rev_count = 0;
-            ui->sensor_reading->setValue(rev_count);
-        } else {
-            int this_elapsed = index_time.elapsed();
-            qDebug() << "elapsed_time = " << this_elapsed;
-            qDebug() << "Sensor high = " << highest_reading << "Sensor low = " << lowest_reading << "Sensor last = " << last_disc_sensor_reading;
-            if ((this_elapsed - last_elapsed) > 500) {  /* Avoid duplicate readings of index strip */
-                ++rev_count;
-                ui->sensor_reading->setValue(rev_count);
-                qDebug() << "rev_count = " << rev_count;
-                formulary_rpm = (float)rev_count/(((float)this_elapsed / 1000 / 60)) /
-                            ((float)motor_calibration_percent/100.0); /* milliseconds to minutes */
-                if (rev_count > 4) {
-                    qDebug() << "Current formulary disc RPM = " << formulary_rpm;
-                    m_dcb->motor_stop();
-                    sr2->set_read_interval(-1); /* This stops the Index polling */
-                } /* endif */
-                last_elapsed = this_elapsed;
+    bool return_value = false;
+    if ((pulse_count == 0) || (pulse_count % (num_bottles + 2) != 0)) {
+        return return_value;
+    } else {
+        int deltas[num_bottles+1];
+        for (int i=0; i<num_bottles+1; ++i) {
+            int this_delta = pulse_times[i+1] - pulse_times[i];
+            deltas[i] = this_delta;
+        } /* endfor */
+        /* First lets get an average and std deviation of the pulse times */
+        /* There should be one less delta, to allow for dropping out the double marker */
+        std::vector<double> pts;
+        for (int i = 0; i < (num_bottles+1); ++i) {
+            if (deltas[i] > 500) {
+                pts.push_back(deltas[i]);
+                qDebug() << "pts[" << pts.size()-1 << "] = " << pts[pts.size()-1];
             } /* endif */
+        } /* endfor */
+        double sum = std::accumulate(pts.begin(), pts.end(), 0.0);
+        double mean = sum / pts.size();
+
+        std::vector<double> pts_diff(pts.size());
+        std::transform(pts.begin(), pts.end(), pts_diff.begin(),
+                       std::bind2nd(std::minus<double>(), mean));
+        double sq_sum = std::inner_product(pts_diff.begin(), pts_diff.end(), pts_diff.begin(), 0.0);
+        double stdev = std::sqrt(sq_sum / pts.size());
+        qDebug() << "Stats of pulse times mean =" << mean << "std deviation =" << stdev;
+        return_value = stdev < 500.0;
+        if (return_value) {
+            /* Now calculate RPM */
+            formulary_rpm = (double)(1.0/((double)mean/1000.0 * num_bottles) * 60) /((double)motor_calibration_percent / 100.0);
+            qDebug() << "Calculated RPM is " <<  formulary_rpm;
+            m_dcb->set_motor_rotation_speed(formulary_rpm);
         } /* endif */
+        return return_value;
     } /* endif */
-    last_disc_sensor_reading = this_reading;
+}
+
+/* Finish setting up disk characterization parms like RPM and current position */
+void Meds_dispensary::disk_index_setup() {
+
+    int deltas[num_bottles+1];
+    for (int i=0; i<num_bottles+1; ++i) {
+        int this_delta = pulse_times[i+1] - pulse_times[i];
+        deltas[i] = this_delta;
+    } /* endfor */
+
+    /* Figure out where the index mark is by looking for two pulses that are close together in time */
+    m_dcb->motor_stop(); /* Stop the motor while we figure this out */
+    /* Find index of minimal delta */
+    int min_elem_value = 32767;
+    int min_elem = 0;
+    for (int i=0; i<num_bottles; ++i) {
+        qDebug() << "deltas[" << i << "] = " << deltas[i];
+        if (deltas[i] < min_elem_value) {
+            min_elem = i;
+            min_elem_value = deltas[i];
+        } /* endif */
+    } /* endfor */
+    qDebug() << "min_elem=" << min_elem << "min_elem_value=" << min_elem_value;
+    qDebug() << "Current position is " << ((pulse_count-2-min_elem) % num_bottles) << "slots past index";
+    m_dcb->set_motor_position((360/num_bottles)*(pulse_count-2-min_elem)-2);
+}
+
+void Meds_dispensary::disc_sensor_proc(int trigger_value) {
+    //qDebug() << "Saw sensor_change = " << trigger_value;
+    last_disc_sensor_reading = trigger_value;
+    pulse_times[pulse_count % (num_bottles+2)] = pulse_time.elapsed();
+     qDebug() << "pulse_times["<< pulse_count << "]=" << pulse_times[pulse_count % (num_bottles+2)];
+    ++pulse_count;
+    formulary_fsm.sensor_pulse();
+    ui->sensor_reading->setValue((pulse_count % (num_bottles)));
+} /* disc_sensor_read */
+
+void Meds_dispensary::move_disk(unsigned int slot_num) {
+    m_dcb->motor_goto_pos(slot_num*(num_bottles-1), wheel_speed);
+}
+
+void Meds_dispensary::movement_done_proc(int) {
+    formulary_fsm.movement_done();
 } /* disc_sensor_read */
