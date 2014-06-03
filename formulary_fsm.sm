@@ -38,9 +38,8 @@ locating_index
                                         nil                     { /* Keep counting */ }
                     sensor_pulse
                         [ctxt.stable_sensor_pulses()]
-                                        waiting_to_arrive       {
+                                        ready_to_move           {
                                                                     disk_index_setup(); /* Finish calculating disk RPM and position */
-                                                                    move_disk(0); /* Move disk to slot 0 */
                                                                 }
                     shutdown            off                     {}
                     Unknown             error                   {}
@@ -51,8 +50,7 @@ ready_to_move
         set_status_label(QString("Ready to Move disk"));
     }
 {
-                    sensor_pulse
-                                        nil                     { /* Keep counting */ }
+                    sensor_pulse        nil                     { /* Keep counting */ }
                     move_cmd            waiting_to_arrive       {}
                     shutdown            off                     {}
                     Unknown             error                   {}
@@ -63,8 +61,8 @@ waiting_to_arrive
         set_status_label(QString("Moving to slot"));
     }
 {
-                    sensor_pulse
-                                        nil                     { /* Keep moving */}
+                    sensor_pulse        nil                     { /* Keep moving */}
+                    move_cmd            nil                     {}
                     movement_done       ready_to_move           {}
                     halt_operation      off                     {}
                     Unknown             error                   {}

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network xml sql
 
 QMAKE_CXXFLAGS += -std=c++11
 INCLUDEPATH += ../beaglebone/hw_drivers/bbb_motor_control
@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     ../beaglebone/hw_drivers/bbb_motor_control/adafruit_bbio_util.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/motor.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.cpp \
-    ../beaglebone/hw_drivers/bbb_motor_control/gpio_sensor.cpp
+    ../beaglebone/hw_drivers/bbb_motor_control/gpio_sensor.cpp \
+    dispensary_sslsock.cpp
 
 HEADERS  += meds_dispensary.h \
     $$fsm_target_h.target \
@@ -49,7 +50,8 @@ HEADERS  += meds_dispensary.h \
     ../beaglebone/hw_drivers/bbb_motor_control/i2c-dev.lm-sensors.h \
     ../beaglebone/hw_drivers/bbb_motor_control/ssd1306.h \
     ../beaglebone/hw_drivers/bbb_motor_control/motor.h \
-    ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.h
+    ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.h \
+    dispensary_sslsock.h
 
 FORMS    += meds_dispensary.ui
 

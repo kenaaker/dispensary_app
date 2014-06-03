@@ -6,9 +6,10 @@
 #include "gpio_sensor.h"
 #include <formulary_fsm_sm.h>
 #include "gpio_keypad.h"
+#include "dispensary_sslsock.h"
 
 namespace Ui {
-class Meds_dispensary;
+    class Meds_dispensary;
 }
 
 static const int num_bottles = 6;
@@ -31,6 +32,7 @@ public:
     void disk_index_setup(void);
     unsigned int pulse_count;
     void move_disk(unsigned int slot_num);
+    void move_disk_relative(int offset);
 private:
     Ui::Meds_dispensary *ui;
     motor *m_dca;
@@ -45,6 +47,8 @@ private:
     gpio_keypad *keypad_sw4;
     gpio_keypad *keypad_sw5;
 
+    int current_slot;
+    int destination_slot;
     unsigned int last_disc_sensor_reading;
     int last_elapsed;
     unsigned int lowest_reading;
@@ -54,13 +58,26 @@ private:
     bool first_pulse;
     QTime index_time;
     QTime pulse_time;
+    int mean_elapsed_sector_time;
     unsigned int rev_count;
     int pulse_times[num_bottles+2];   /* Allow space to capture one wrap around reading, needed for case where it starts between double mark */
 
+    dispensary_sslsock cmd_server;
+
 private slots:
+    void move_home(int on_off);
+    void move_minus_1(int on_off);
+    void move_plus_1(int on_off);
+    void move_dispense(int on_off);
     void dispense_start(void);
     void disc_sensor_proc(int trigger_value);
     void movement_done_proc(int);
+    void command_proc(QString &cmd);
 };
+
+
+static inline int modulo(int m, int n) {
+    return m >= 0 ? m % n : ( n - abs ( m%n ) ) % n;
+} /* modulo */
 
 #endif // MEDS_DISPENSARY_H
