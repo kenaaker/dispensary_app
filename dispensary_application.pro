@@ -27,6 +27,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = dispensary_application
 TEMPLATE = app
 
+#LIBS += -lQxtZeroconf -lQxtCore -lQxtNetwork
+LIBS += -lavahi-common -lavahi-client
 
 SOURCES += main.cpp\
     meds_dispensary.cpp \
@@ -38,7 +40,10 @@ SOURCES += main.cpp\
     ../beaglebone/hw_drivers/bbb_motor_control/motor.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.cpp \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_sensor.cpp \
-    dispensary_sslsock.cpp
+    dispensary_sslsock.cpp \
+    qt-watch.cpp \
+    zconfservice.cpp \
+    zconfserviceclient.cpp
 
 HEADERS  += meds_dispensary.h \
     $$fsm_target_h.target \
@@ -51,7 +56,10 @@ HEADERS  += meds_dispensary.h \
     ../beaglebone/hw_drivers/bbb_motor_control/ssd1306.h \
     ../beaglebone/hw_drivers/bbb_motor_control/motor.h \
     ../beaglebone/hw_drivers/bbb_motor_control/gpio_keypad.h \
-    dispensary_sslsock.h
+    dispensary_sslsock.h \
+    qt-watch.h \
+    zconfservice.h \
+    zconfserviceclient.h
 
 FORMS    += meds_dispensary.ui
 

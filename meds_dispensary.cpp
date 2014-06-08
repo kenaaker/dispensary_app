@@ -5,6 +5,7 @@
 #include <QProgressBar>
 #include <QtCore/qdebug.h>
 #include <QTime>
+#include "zconfservice.h"
 #include <algorithm>
 
 Meds_dispensary::Meds_dispensary(QWidget *parent) :
@@ -42,6 +43,10 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
     } /* endif */
     connect(&cmd_server, SIGNAL(command_received(QString &)), this, SLOT(command_proc(QString &)));
 
+    disp_svc = new ZConfService(this);
+//    disp_svc->setPort(45046);
+
+    disp_svc->registerService("dispensary", 45046, "_dispensaryui._tcp");
 //    QFontDatabase fonts;
 //    qDebug() << "fonts" << fonts.families();
 
@@ -55,6 +60,7 @@ Meds_dispensary::~Meds_dispensary() {
     delete m_dcb;
     delete m_dca;
     delete ui;
+//    delete disp_svc;
 }
 
 void Meds_dispensary::dispense_start(void) {
@@ -286,17 +292,21 @@ void Meds_dispensary::movement_done_proc(int) {
 } /* disc_sensor_read */
 
 void Meds_dispensary::command_proc(QString &cmd) {
-    qDebug() << "Got new command =\"" << cmd << "\"";
-    if (cmd == "counter_clockwise_1") {
-        move_minus_1(1);
-    }
-    if (cmd == "clockwise_1") {
-        move_plus_1(1);
-    }
-    if (cmd == "home") {
-        move_home(1);
-    }
-    if (cmd == "dispense") {
-        move_dispense(1);
-    }
+    qDebug() << "Got new command = " << cmd;
+    if (QString(formulary_fsm.getState().getName()) != "formulary_fsm::ready_to_move") {
+        qDebug() << "Still busy with previous command current state is " << QString(formulary_fsm.getState().getName());
+    } else {
+        if (cmd == "counter_clockwise_1") {
+            move_minus_1(1);
+        }
+        if (cmd == "clockwise_1") {
+            move_plus_1(1);
+        }
+        if (cmd == "home") {
+            move_home(1);
+        }
+        if (cmd == "dispense") {
+            move_dispense(1);
+        }
+    } /* endif */
 } /* command proc */

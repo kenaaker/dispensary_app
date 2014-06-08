@@ -7,6 +7,7 @@
 #include <formulary_fsm_sm.h>
 #include "gpio_keypad.h"
 #include "dispensary_sslsock.h"
+#include "zconfservice.h"
 
 namespace Ui {
     class Meds_dispensary;
@@ -63,6 +64,7 @@ private:
     int pulse_times[num_bottles+2];   /* Allow space to capture one wrap around reading, needed for case where it starts between double mark */
 
     dispensary_sslsock cmd_server;
+    ZConfService *disp_svc;
 
 private slots:
     void move_home(int on_off);
