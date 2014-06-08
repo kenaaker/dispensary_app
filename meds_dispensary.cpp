@@ -60,7 +60,7 @@ Meds_dispensary::~Meds_dispensary() {
     delete m_dcb;
     delete m_dca;
     delete ui;
-//    delete disp_svc;
+    delete disp_svc;
 }
 
 void Meds_dispensary::dispense_start(void) {
