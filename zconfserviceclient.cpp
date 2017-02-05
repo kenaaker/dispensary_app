@@ -22,15 +22,13 @@
 #include <avahi-common/error.h>
 #include "zconfserviceclient.h"
 
-void ZConfServiceClient::run()
-{
-    if (client)
-        return;
-    avahi_client_new(poll, (AvahiClientFlags) 0, ZConfServiceClient::callback, this, &error);
+void ZConfServiceClient::run() {
+    if (!client) {
+        avahi_client_new(poll, (AvahiClientFlags) 0, ZConfServiceClient::callback, this, &error);
+    }
 }
 
-QString ZConfServiceClient::errorString() const
-{
+QString ZConfServiceClient::errorString() const {
     return avahi_strerror(error);
 }
 
@@ -38,20 +36,17 @@ ZConfServiceClient::ZConfServiceClient(QObject *parent)
     : QObject(parent),
       poll(avahi_qt_poll_get()),
       client(0),
-      error(0)
-{
+      error(0) {
 }
 
-ZConfServiceClient::~ZConfServiceClient()
-{
+ZConfServiceClient::~ZConfServiceClient() {
     if (client)
         // This will automatically free all associated browser,
         // resolve and entry group objects.
         avahi_client_free(client);
 }
 
-void ZConfServiceClient::callback(AvahiClient *client, AvahiClientState state, void *userdata)
-{
+void ZConfServiceClient::callback(AvahiClient *client, AvahiClientState state, void *userdata) {
     ZConfServiceClient *service = static_cast<ZConfServiceClient *>(userdata);
     if (service) {
         service->client = client;

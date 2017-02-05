@@ -7,6 +7,7 @@
 QT       += core gui network xml sql
 
 QMAKE_CXXFLAGS += -std=c++11
+# QMAKE_LFLAGS +=
 INCLUDEPATH += ../beaglebone/hw_drivers/bbb_motor_control
 INCLUDEPATH += /afs/aaker.org/home/kdaaker/src/smc_6_3_0/lib/C++
 

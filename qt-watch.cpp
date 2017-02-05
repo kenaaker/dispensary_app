@@ -62,8 +62,7 @@ void AvahiWatch::setWatchedEvents(AvahiWatchEvent event) {
 }    
 
 AvahiTimeout::AvahiTimeout(const struct timeval* tv, AvahiTimeoutCallback callback, void *userdata) : 
-    m_callback(callback), m_userdata(userdata)
-{
+    m_callback(callback), m_userdata(userdata) {
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
     m_timer.setSingleShot(true);
     update(tv);
@@ -81,7 +80,7 @@ void AvahiTimeout::timeout() {
     m_callback(this,m_userdata);
 }
 
-static AvahiWatch* q_watch_new(const AvahiPoll *api, int fd,
+static AvahiWatch* q_watch_new(const AvahiPoll *, int fd,
                                AvahiWatchEvent event, AvahiWatchCallback callback,
                                void *userdata) {
     return new AvahiWatch(fd, event, callback, userdata);
@@ -99,7 +98,7 @@ static void q_watch_free(AvahiWatch *w) {
     delete w;
 }
     
-static AvahiTimeout* q_timeout_new(const AvahiPoll *api, const struct timeval *tv, AvahiTimeoutCallback callback, 
+static AvahiTimeout* q_timeout_new(const AvahiPoll *, const struct timeval *tv, AvahiTimeoutCallback callback,
     void *userdata) {
     return new AvahiTimeout(tv, callback, userdata);
 }

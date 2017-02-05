@@ -14,6 +14,8 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
     ui(new Ui::Meds_dispensary)
  {
 
+//    QFontDatabase fonts;
+//    qDebug() << "fonts" << fonts.families();
     ui->setupUi(this);
     m_dca = new motor(e_motor_id::e_motor_a);
     m_dca->set_motor_rotation_speed(248);
@@ -47,8 +49,6 @@ Meds_dispensary::Meds_dispensary(QWidget *parent) :
 //    disp_svc->setPort(45046);
 
     disp_svc->registerService("dispensary", 45046, "_dispensaryui._tcp");
-//    QFontDatabase fonts;
-//    qDebug() << "fonts" << fonts.families();
 
 }
 
